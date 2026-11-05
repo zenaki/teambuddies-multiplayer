@@ -97,7 +97,7 @@ function buildMediaStream() {
   return stream;
 }
 
-let detector, hostView, currentLayout = "full", lastTags = {};
+let detector, hostView, currentLayout = "full";
 let hostName = "";
 try { hostName = localStorage.getItem("tb-name") || ""; } catch {}
 $("#hostName").value = hostName;
@@ -123,10 +123,7 @@ function setupFocusView() {
     broadcast({ t: "layout", layout });
   });
   hostView.setNames(playerNames());
-  new MarkerTracker(lv, () => currentLayout, tags => {
-    lastTags = tags; hostView.setTags(tags);
-    broadcast({ t: "tags", p: tags });
-  });
+
 }
 // Only cover the emulator canvas when a split-screen is on and focus is wanted;
 // menus keep the direct (zero extra latency) emulator canvas.

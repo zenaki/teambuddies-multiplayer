@@ -28,7 +28,7 @@ Team Buddies menggambar split-screen di satu layar PS1: **2P = atas/bawah**, **3
 - Di mode 3–4P, radar dan timer bersama di tengah layar ditampilkan sebagai inset kecil (bisa dimatikan dengan opsi **Radar**).
 - Kalau deteksi meleset, host bisa memaksa layout lewat pilihan **Layout** (Otomatis / Layar penuh / 2P / 3P / 4P), dan setiap pemain bisa kembali ke tampilan semua layar dengan mematikan **Fokus ke layarku**.
 
-**Nama di atas karakter:** buddy yang sedang dikontrol ditandai game dengan segitiga merah-kuning di bawah kakinya. Host mencari segitiga itu di tiap viewport sekitar 10× per detik, lalu setiap pemain menggambar nama pemilik slot di atas karakternya. Viewport tanpa pemain (bot/CPU, atau pemain yang keluar) tidak diberi nama. Nama host diisi di halaman host sebelum mulai. Label bisa dimatikan lewat opsi **Nama**.
+**Nama di atas karakter:** kamera tiap viewport selalu mengikuti buddy yang dikontrol pemain itu, jadi nama pemilik slot digambar di atas kepala buddy di tengah viewport-nya. Viewport tanpa pemain (bot/CPU, atau pemain yang keluar) tidak diberi nama. Nama host diisi di halaman host sebelum mulai. Label bisa dimatikan lewat opsi **Nama**. Belum didukung: nama di atas karakter pemain lain yang muncul di viewport-mu (butuh posisi unit dari memori game).
 
 Keterbatasan: resolusi asli PS1 dibagi per pemain, jadi tampilan fokus memang lebih buram dibanding layar penuh. Tampilan fokus di host juga digambar dari stream lokal, sehingga ada tambahan sekitar 1 frame latensi. Saat menu, host tetap memakai kanvas emulator langsung.
 

@@ -88,7 +88,6 @@ async function join(room, name) {
         let m; try { m = JSON.parse(ev.data); } catch { return; }
         if (m.t === "welcome" || m.t === "layout") setLayout(m.layout || "full");
         if (m.names) view.setNames(m.names);
-        if (m.t === "tags") view.setTags(m.p);
         if (m.t === "pong") {
           const ms = Math.round(performance.now() - m.ts);
           $("#rtt").textContent = `${ms} ms`; $("#rtt").classList.remove("hidden");
