@@ -97,8 +97,43 @@ function buildMediaStream() {
   return stream;
 }
 
+let detector, hostView, currentLayout = "full";
+function setupFocusView() {
+  const lv = $("#localVideo");
+  lv.srcObject = new MediaStream(mediaStream.getVideoTracks());
+  lv.play().catch(() => {});
+  hostView = new FocusView(lv, $("#focusCanvas"));
+  hostView.slot = 1;
+  detector = new LayoutDetector(lv, layout => {
+    currentLayout = layout;
+    hostView.layout = layout;
+    $("#layoutTag").textContent = { full: "penuh", h2: "2P", quad: "4P", quad3: "3P" }[layout] || layout;
+    updateOverlay();
+    broadcast({ t: "layout", layout });
+  });
+}
+// Only cover the emulator canvas when a split-screen is on and focus is wanted;
+// menus keep the direct (zero extra latency) emulator canvas.
+function updateOverlay() {
+  const show = hostView && hostView.focus && currentLayout !== "full";
+  $("#focusCanvas").classList.toggle("hidden", !show);
+}
+function broadcast(msg) {
+  const s = JSON.stringify(msg);
+  for (const p of peers.values()) if (p.ctrl && p.ctrl.readyState === "open") p.ctrl.send(s);
+}
+$("#focusBtn").onclick = () => {
+  hostView.focus = !hostView.focus;
+  $("#focusBtn").classList.toggle("on", hostView.focus);
+  $("#focusBtn").setAttribute("aria-pressed", hostView.focus);
+  updateOverlay();
+};
+$("#radarChk").onchange = e => { if (hostView) hostView.radar = e.target.checked; };
+$("#layoutSel").onchange = e => detector && detector.setOverride(e.target.value);
+
 async function onGameStart() {
   mediaStream = buildMediaStream();
+  setupFocusView();
   const cfg = await loadConfig();
   rtcConfig = { iceServers: cfg.iceServers };
   try { signal = await createSignal(cfg); } catch (e) { $("#netStatus").textContent = e.message; return; }
@@ -130,7 +165,7 @@ async function connectGuest({ id, name, slot }) {
   peer.input.binaryType = "arraybuffer";
   peer.input.onmessage = e => applyInput(peer, InputPacket.decode(e.data));
   peer.ctrl = pc.createDataChannel("ctrl");
-  peer.ctrl.onopen = () => peer.ctrl.send(JSON.stringify({ t: "welcome", slot }));
+  peer.ctrl.onopen = () => peer.ctrl.send(JSON.stringify({ t: "welcome", slot, layout: currentLayout }));
   peer.ctrl.onmessage = e => {
     peer.lastSeen = performance.now();
     let m; try { m = JSON.parse(e.data); } catch { return; }

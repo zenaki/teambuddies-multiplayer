@@ -22,7 +22,28 @@
   </section>
 
   <section id="session" class="grid two hidden">
-    <div><div id="game"></div></div>
+    <div>
+      <div class="stage">
+        <div id="game"></div>
+        <canvas id="focusCanvas" class="focus-overlay hidden"></canvas>
+        <video id="localVideo" class="probe" muted playsinline autoplay></video>
+      </div>
+      <div class="row viewbar">
+        <span class="muted">Tampilan:</span>
+        <button id="focusBtn" class="small toggle on" aria-pressed="true">Fokus ke layarku</button>
+        <label class="inline"><input id="radarChk" type="checkbox" checked> Radar</label>
+        <span class="sp"></span>
+        <label class="inline muted" for="layoutSel">Layout</label>
+        <select id="layoutSel">
+          <option value="auto">Otomatis</option>
+          <option value="full">Layar penuh</option>
+          <option value="h2">2 pemain (atas/bawah)</option>
+          <option value="quad3">3 pemain (kuadran)</option>
+          <option value="quad">4 pemain (kuadran)</option>
+        </select>
+        <span id="layoutTag" class="pill">full</span>
+      </div>
+    </div>
     <aside class="grid" style="align-content:start">
       <div class="card">
         <h2>Undang teman</h2>
@@ -53,6 +74,7 @@
 </main>
 
 <script src="common.js"></script>
+<script src="viewport.js"></script>
 <script src="host.js"></script>
 </body>
 </html>

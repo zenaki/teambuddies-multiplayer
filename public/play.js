@@ -10,6 +10,20 @@ function localStorageGet(k) { try { return localStorage.getItem(k); } catch { re
 function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
 
 let pc, inputCh, ctrlCh, signal, mySlot = 0, active = false;
+const view = new FocusView($("#video"), $("#view"));
+const LAYOUT_LABEL = { full: "Saat ini: layar penuh.", h2: "Saat ini: 2 pemain.", quad3: "Saat ini: 3 pemain.", quad: "Saat ini: 4 pemain." };
+// the screen box takes the shape of what is shown (e.g. a wide strip in 2P), never taller than 4:3
+function fitScreen() { $(".screen").style.aspectRatio = String(Math.max(4 / 3, view.aspect())); }
+function setLayout(l) { view.layout = l; $("#layoutInfo").textContent = LAYOUT_LABEL[l] || ""; fitScreen(); }
+try { view.focus = localStorage.getItem("tb-focus") !== "0"; view.radar = localStorage.getItem("tb-radar") !== "0"; } catch {}
+$("#focusBtn").classList.toggle("on", view.focus); $("#radarChk").checked = view.radar;
+$("#focusBtn").onclick = () => {
+  view.focus = !view.focus;
+  $("#focusBtn").classList.toggle("on", view.focus); $("#focusBtn").setAttribute("aria-pressed", view.focus);
+  localStorageSet("tb-focus", view.focus ? "1" : "0");
+  fitScreen();
+};
+$("#radarChk").onchange = e => { view.radar = e.target.checked; localStorageSet("tb-radar", view.radar ? "1" : "0"); };
 const status = t => { $("#status").textContent = t; };
 
 $("#joinForm").onsubmit = async e => {
@@ -37,7 +51,7 @@ async function join(room, name) {
   signal.on("error", ({ error }) => fail(error));
   signal.on("host-left", () => fail("Host menutup room"));
   signal.on("joined", ({ slot }) => {
-    mySlot = slot;
+    mySlot = slot; view.slot = slot; fitScreen();
     $("#you").textContent = `Kamu P${slot}`; $("#you").classList.remove("hidden");
     $("#waitMsg").textContent = "Menunggu stream dari host…";
     status(`Masuk room ${room} sebagai pemain ${slot}`);
@@ -69,6 +83,7 @@ async function join(room, name) {
       ctrlCh = ch;
       ch.onmessage = ev => {
         let m; try { m = JSON.parse(ev.data); } catch { return; }
+        if (m.t === "welcome" || m.t === "layout") setLayout(m.layout || "full");
         if (m.t === "pong") {
           const ms = Math.round(performance.now() - m.ts);
           $("#rtt").textContent = `${ms} ms`; $("#rtt").classList.remove("hidden");

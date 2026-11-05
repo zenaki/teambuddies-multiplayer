@@ -50,3 +50,15 @@ table.keys td:last-child { text-align: right; font-family: ui-monospace, monospa
 kbd { background: #10121a; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 12px; }
 .err { color: var(--bad); }
 .status { font-size: 13px; color: var(--muted); }
+
+/* focus view */
+.stage { position: relative; }
+.focus-overlay { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 10px; background: #000; pointer-events: none; z-index: 5; }
+video.probe { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; left: 0; top: 0; }
+.viewbar { margin-top: 10px; font-size: 13px; }
+.viewbar .sp { flex: 1; }
+label.inline { display: inline-flex; align-items: center; gap: 6px; margin: 0; color: var(--text); font-size: 13px; }
+select { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); background: #10121a; color: var(--text); font-size: 13px; }
+button.toggle.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.screen canvas.view { position: absolute; inset: 0; width: 100%; height: 100%; }
+.screen video.probe { position: absolute; }

@@ -19,7 +19,8 @@
 <main class="wrap grid two">
   <div>
     <div class="screen">
-      <video id="video" autoplay playsinline muted></video>
+      <video id="video" class="probe" autoplay playsinline muted></video>
+      <canvas id="view" class="view"></canvas>
       <div id="overlay" class="overlay">
         <form id="joinForm" class="card" style="width:min(360px,100%);text-align:left">
           <h2>Gabung ke room</h2>
@@ -59,12 +60,18 @@
         <tr><td>Analog kiri</td><td>T F G H</td></tr>
       </table>
       <p class="muted"><small>Gamepad USB/Bluetooth langsung terbaca. Di HP muncul tombol sentuh.</small></p>
-      <p><button id="fsBtn" class="small">Layar penuh</button></p>
+      <div class="row" style="margin-top:10px">
+        <button id="focusBtn" class="small toggle on" aria-pressed="true">Fokus ke layarku</button>
+        <label class="inline"><input id="radarChk" type="checkbox" checked> Radar</label>
+        <button id="fsBtn" class="small">Layar penuh</button>
+      </div>
+      <p class="muted"><small>Saat split-screen, kamu hanya melihat bagian layarmu sendiri (layout dideteksi otomatis oleh host). <span id="layoutInfo"></span></small></p>
     </div>
     <div class="card"><h2>Status</h2><p id="status" class="status">Belum terhubung</p><p id="padStatus" class="status"></p></div>
   </aside>
 </main>
 <script src="common.js"></script>
+<script src="viewport.js"></script>
 <script src="play.js"></script>
 </body>
 </html>
