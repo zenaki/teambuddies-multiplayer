@@ -1,0 +1,71 @@
+{
+ "name": "Team Buddies.chd",
+ "size": 265732662,
+ "kdf": {
+  "name": "PBKDF2",
+  "hash": "SHA-256",
+  "iterations": 600000,
+  "salt": "J91EiLTNv8mmk14Q0zQpXg=="
+ },
+ "check": {
+  "iv": "rfzuEez/0/n1Gris",
+  "data": "qeGebwYdSH8bvpQNsfHM6IK0OrbdtK5+//CFHiAmmw=="
+ },
+ "parts": [
+  {
+   "file": "part-000.bin",
+   "iv": "3k5ar8+RKyuPUrxX",
+   "size": 25165824
+  },
+  {
+   "file": "part-001.bin",
+   "iv": "AZwzol+mX1su4aon",
+   "size": 25165824
+  },
+  {
+   "file": "part-002.bin",
+   "iv": "M13xlxNKf4kddOMv",
+   "size": 25165824
+  },
+  {
+   "file": "part-003.bin",
+   "iv": "E7EnZ4H/ugrn4XO+",
+   "size": 25165824
+  },
+  {
+   "file": "part-004.bin",
+   "iv": "tpvzadwyJWfqCkGA",
+   "size": 25165824
+  },
+  {
+   "file": "part-005.bin",
+   "iv": "kH+NKEZAc2ouglUd",
+   "size": 25165824
+  },
+  {
+   "file": "part-006.bin",
+   "iv": "Z5fa14q782oVxAWM",
+   "size": 25165824
+  },
+  {
+   "file": "part-007.bin",
+   "iv": "CKOGep+RGup9cRSt",
+   "size": 25165824
+  },
+  {
+   "file": "part-008.bin",
+   "iv": "k+/dSx1ox5v63C5c",
+   "size": 25165824
+  },
+  {
+   "file": "part-009.bin",
+   "iv": "kBascE1CgTMwWwLE",
+   "size": 25165824
+  },
+  {
+   "file": "part-010.bin",
+   "iv": "C+YBCf9QcRVc8dRC",
+   "size": 14074422
+  }
+ ]
+}
