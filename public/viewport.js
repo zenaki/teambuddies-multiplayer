@@ -117,45 +117,66 @@ class FocusView {
   }
 }
 
-// ---- Name tags above the controlled buddy -------------------------------------
-// The camera of every split viewport follows that player's controlled buddy, so the buddy's
-// head sits at a fixed point of its viewport. Tags are placed there; viewports nobody owns
-// (bots, or a player who left) get no tag.
+// ---- Name tags above the controlled buddies -------------------------------------
+// Tags are [slot, fx, fy, viewport] in fractions of the video frame. The host computes them from
+// the game's memory (gamemem.js): every player-controlled buddy is projected into every viewport,
+// so you also see the names of other players walking through your screen. Buddies controlled by
+// nobody connected (bots) get no tag.
 const PLAYER_COLORS = { 1: "#4aa3ff", 2: "#ff5d5d", 3: "#3ccf7a", 4: "#f5b301" };
-const HEAD_POINT = { quad: [0.5, 0.31], quad3: [0.5, 0.31], h2: [0.5, 0.30] }; // within the viewport rect
-
-function tagPositions(layout) {
-  const rects = LAYOUTS[layout] || {}, hp = HEAD_POINT[layout], out = {};
+// Fallback when the game's memory can't be read: each camera follows its player's buddy,
+// so the head is near a fixed point of that player's viewport.
+const HEAD_POINT = { quad: [0.5, 0.31], quad3: [0.5, 0.31], h2: [0.5, 0.30] };
+function fallbackTags(layout) {
+  const rects = LAYOUTS[layout] || {}, hp = HEAD_POINT[layout], out = [];
   if (!hp) return out;
   for (const s in rects) {
     const [x0, y0, x1, y1] = rects[s];
-    out[s] = [x0 + hp[0] * (x1 - x0), y0 + hp[1] * (y1 - y0)];
+    out.push([+s, x0 + hp[0] * (x1 - x0), y0 + hp[1] * (y1 - y0), +s - 1]);
   }
   return out;
 }
 
-// Drawing
 FocusView.prototype.setNames = function (names) { this.names = names || {}; };
+// Tag snapshots arrive ~30x/s, ahead of the video they belong to. They are replayed `tagDelay` ms
+// after arrival and interpolated between snapshots so the labels stay glued to the characters.
+FocusView.prototype.pushTags = function (tags, t = performance.now()) {
+  const tl = this.tagLine || (this.tagLine = []);
+  tl.push({ t, tags: tags || [] });
+  while (tl.length > 2 && tl[0].t < t - 1500) tl.shift();
+};
+FocusView.prototype.currentTags = function () {
+  const tl = this.tagLine;
+  if (!tl || !tl.length) return [];
+  const t = performance.now() - (this.tagDelay || 0);
+  let i = tl.length - 1;
+  while (i > 0 && tl[i].t > t) i--;
+  const a = tl[i], b = tl[i + 1];
+  if (a.t > t || !b || b.t - a.t > 250) return a.tags;
+  const f = (t - a.t) / (b.t - a.t), key = x => x[0] * 8 + x[3];
+  const next = new Map(b.tags.map(x => [key(x), x]));
+  return a.tags.map(x => { const y = next.get(key(x)); return y ? [x[0], x[1] + (y[1] - x[1]) * f, x[2] + (y[2] - x[2]) * f, x[3]] : x; });
+};
 FocusView.prototype.drawTags = function (geo) {
-  const tgt = tagPositions(this.layout), names = this.names || {};
-  const ctx = this.ctx, dpr = devicePixelRatio || 1;
-  for (const slot in tgt) {
+  const names = this.names || {}, ctx = this.ctx, dpr = devicePixelRatio || 1;
+  const [x0, y0, x1, y1] = geo.rect;
+  const own = this.focus && LAYOUTS[this.layout] && LAYOUTS[this.layout][this.slot] ? this.slot - 1 : -1;
+  for (const [slot, fx, fy, vp] of this.currentTags()) {
     const name = names[slot];
-    if (!name) continue; // nobody owns this viewport -> bot, no tag
-    const p = tgt[slot];
-    const [x0, y0, x1, y1] = geo.rect;
-    if (p[0] < x0 || p[0] > x1 || p[1] < y0 || p[1] > y1) continue;
-    const cx = geo.dx + (p[0] - x0) / (x1 - x0) * geo.dw, cy = geo.dy + (p[1] - y0) / (y1 - y0) * geo.dh;
+    if (!name) continue;                    // not a connected human -> bot, no tag
+    if (own >= 0 && vp !== own) continue;   // focused: only tags of my own viewport
+    if (fx < x0 || fx > x1 || fy < y0 - 0.02 || fy > y1) continue;
+    const cx = geo.dx + (fx - x0) / (x1 - x0) * geo.dw, cy = geo.dy + (Math.max(fy, y0) - y0) / (y1 - y0) * geo.dh;
     const fs = Math.max(11 * dpr, Math.min(18 * dpr, geo.dh * 0.045));
     ctx.font = `700 ${fs}px system-ui, sans-serif`;
-    const tw = ctx.measureText(name).width, padX = fs * 0.5, h = fs * 1.5;
-    const bx = Math.max(geo.dx, Math.min(geo.dx + geo.dw - tw - padX * 2, cx - tw / 2 - padX)), by = Math.max(geo.dy + 2 * dpr, cy - h);
+    const tw = ctx.measureText(name).width, padX = fs * 0.5, h = fs * 1.5, ptr = 6 * dpr;
+    const bx = Math.max(geo.dx, Math.min(geo.dx + geo.dw - tw - padX * 2, cx - tw / 2 - padX));
+    const by = Math.max(geo.dy + 2 * dpr, cy - h - ptr);
     ctx.fillStyle = "rgba(0,0,0,.65)";
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, tw + padX * 2, h, h / 2) : ctx.rect(bx, by, tw + padX * 2, h); ctx.fill();
     ctx.fillStyle = PLAYER_COLORS[slot] || "#fff"; ctx.fillRect(bx + h / 2, by + h - 2 * dpr, tw + padX * 2 - h, 2 * dpr);
     ctx.fillStyle = "#fff"; ctx.textBaseline = "middle"; ctx.fillText(name, bx + padX, by + h / 2);
-    // little pointer
+    // pointer down to the head
     ctx.fillStyle = "rgba(0,0,0,.65)"; ctx.beginPath();
-    ctx.moveTo(cx - 5 * dpr, by + h); ctx.lineTo(cx + 5 * dpr, by + h); ctx.lineTo(cx, by + h + 6 * dpr); ctx.fill();
+    ctx.moveTo(cx - 5 * dpr, by + h); ctx.lineTo(cx + 5 * dpr, by + h); ctx.lineTo(cx, by + h + ptr); ctx.fill();
   }
 };

@@ -123,7 +123,30 @@ function setupFocusView() {
     broadcast({ t: "layout", layout });
   });
   hostView.setNames(playerNames());
+  hostView.tagDelay = 35; // the local preview video lags the emulator by ~2 frames
+  startTagLoop();
+}
 
+// Name tags: read the buddies' positions from the game's memory ~30x/s and project them into
+// every viewport (gamemem.js). Falls back to fixed points if the memory can't be read.
+const gameMem = new GameMemory(() => emu() && emu().Module);
+let tagsWereSent = false;
+function startTagLoop() {
+  setInterval(() => {
+    if (currentLayout === "full") {
+      if (tagsWereSent) { hostView.pushTags([]); broadcastTags([]); tagsWereSent = false; }
+      return;
+    }
+    let tags = gameMem.tags();
+    if (tags === null) tags = fallbackTags(currentLayout);
+    hostView.pushTags(tags);
+    broadcastTags(tags);
+    tagsWereSent = true;
+  }, 33);
+}
+function broadcastTags(tags) {
+  const s = JSON.stringify(tags.map(t => [t[0], Math.round(t[1] * 1e4), Math.round(t[2] * 1e4), t[3]]));
+  for (const p of peers.values()) if (p.tags && p.tags.readyState === "open") p.tags.send(s);
 }
 // Only cover the emulator canvas when a split-screen is on and focus is wanted;
 // menus keep the direct (zero extra latency) emulator canvas.
@@ -179,6 +202,7 @@ async function connectGuest({ id, name, slot }) {
   peer.input = pc.createDataChannel("input", { ordered: false, maxRetransmits: 0 });
   peer.input.binaryType = "arraybuffer";
   peer.input.onmessage = e => applyInput(peer, InputPacket.decode(e.data));
+  peer.tags = pc.createDataChannel("tags", { ordered: false, maxRetransmits: 0 });
   peer.ctrl = pc.createDataChannel("ctrl");
   peer.ctrl.onopen = () => peer.ctrl.send(JSON.stringify({ t: "welcome", slot, layout: currentLayout, names: playerNames() }));
   peer.ctrl.onmessage = e => {

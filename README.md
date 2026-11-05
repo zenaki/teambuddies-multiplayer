@@ -28,7 +28,7 @@ Team Buddies menggambar split-screen di satu layar PS1: **2P = atas/bawah**, **3
 - Di mode 3–4P, radar dan timer bersama di tengah layar ditampilkan sebagai inset kecil (bisa dimatikan dengan opsi **Radar**).
 - Kalau deteksi meleset, host bisa memaksa layout lewat pilihan **Layout** (Otomatis / Layar penuh / 2P / 3P / 4P), dan setiap pemain bisa kembali ke tampilan semua layar dengan mematikan **Fokus ke layarku**.
 
-**Nama di atas karakter:** kamera tiap viewport selalu mengikuti buddy yang dikontrol pemain itu, jadi nama pemilik slot digambar di atas kepala buddy di tengah viewport-nya. Viewport tanpa pemain (bot/CPU, atau pemain yang keluar) tidak diberi nama. Nama host diisi di halaman host sebelum mulai. Label bisa dimatikan lewat opsi **Nama**. Belum didukung: nama di atas karakter pemain lain yang muncul di viewport-mu (butuh posisi unit dari memori game).
+**Nama di atas karakter:** host membaca posisi buddy langsung dari RAM PS1 di emulator sekitar 30× per detik, lalu memproyeksikannya ke setiap viewport dengan rumus yang sama dengan GTE game (`public/gamemem.js`). Nama menempel di atas kepala buddy yang sedang dikontrol tiap pemain, ikut bergerak, tetap benar setelah SWAP, dan juga terlihat di layar pemain lain saat buddy-nya lewat. Buddy yang dikontrol AI/bot, atau oleh pemain yang sudah keluar, tidak diberi nama. Di tamu, label diputar ulang mengikuti jeda video (diukur dari statistik WebRTC) dan diinterpolasi supaya tidak mendahului gambar. Kalau memori tidak bisa dibaca (mis. versi game lain), label jatuh kembali ke titik tengah viewport. Nama host diisi sebelum mulai. Label bisa dimatikan lewat opsi **Nama**.
 
 Keterbatasan: resolusi asli PS1 dibagi per pemain, jadi tampilan fokus memang lebih buram dibanding layar penuh. Tampilan fokus di host juga digambar dari stream lokal, sehingga ada tambahan sekitar 1 frame latensi. Saat menu, host tetap memakai kanvas emulator langsung.
 
@@ -100,6 +100,7 @@ Di HP, tamu mendapat tombol sentuh di bawah layar.
 | `server.js` | server statis + signaling room (kode 5 huruf, maks 4 pemain), `/config.json` (ICE), bundel `emulator.min.js` |
 | `public/host.html`, `host.js` | memuat disc, menjalankan EmulatorJS, men-stream kanvas + audio OpenAL, menyuntikkan input tamu |
 | `public/play.html`, `play.js` | penerima stream, input keyboard/gamepad/sentuh, ping |
+| `public/gamemem.js` | pembaca RAM PS1: unit, kamera, viewport, dan proyeksi GTE untuk label nama (khusus SLUS-00869) |
 | `public/viewport.js` | deteksi layout split-screen + renderer tampilan fokus per pemain |
 | `public/common.js` | protokol input, mapping tombol, signaling WebSocket/PeerJS, penulis ZIP (STORE) untuk cue+bin lepas |
 | `scripts/build-static.js` | build `dist/` untuk GitHub Pages |

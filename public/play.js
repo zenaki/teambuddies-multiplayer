@@ -82,6 +82,10 @@ async function join(room, name) {
   pc.ondatachannel = e => {
     const ch = e.channel;
     if (ch.label === "input") { inputCh = ch; inputCh.binaryType = "arraybuffer"; }
+    if (ch.label === "tags") ch.onmessage = ev => {
+      let t; try { t = JSON.parse(ev.data); } catch { return; }
+      view.pushTags(t.map(x => [x[0], x[1] / 1e4, x[2] / 1e4, x[3]]));
+    };
     if (ch.label === "ctrl") {
       ctrlCh = ch;
       ch.onmessage = ev => {
@@ -109,6 +113,18 @@ $("#unmute").onclick = () => {
   active = true;
 };
 $("#fsBtn").onclick = () => { const s = document.querySelector(".screen"); (s.requestFullscreen || s.webkitRequestFullscreen).call(s); };
+// Name-tag data arrives before the video frames it belongs to (the video also waits in the
+// encoder, jitter buffer and decoder), so tags are replayed with the measured video delay.
+setInterval(async () => {
+  if (!pc) return;
+  try {
+    (await pc.getStats()).forEach(r => {
+      if (r.type !== "inbound-rtp" || r.kind !== "video" || !r.jitterBufferEmittedCount) return;
+      const jb = r.jitterBufferDelay / r.jitterBufferEmittedCount, dec = r.framesDecoded ? r.totalDecodeTime / r.framesDecoded : 0;
+      view.tagDelay = Math.min(400, Math.max(0, (jb + dec) * 1000 + 35));
+    });
+  } catch {}
+}, 2000);
 setInterval(() => { if (ctrlCh && ctrlCh.readyState === "open") ctrlCh.send(JSON.stringify({ t: "ping", ts: performance.now() })); }, 1000);
 
 // ---------- Input capture ----------
