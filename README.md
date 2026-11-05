@@ -39,7 +39,9 @@ npm install
 npm start            # http://localhost:8080   (PORT=xxxx untuk port lain)
 ```
 
-1. Host membuka `/host.html` lalu memilih file **`.cue` + semua `.bin`** sekaligus, atau satu arsip `.zip`/`.7z` berisi keduanya.
+1. Host membuka `/host.html` lalu memilih disc. **Paling disarankan: satu file `.chd`** (wajib untuk host di HP/iPad). Bisa juga `.cue` + semua `.bin` sekaligus, atau arsip `.zip`/`.7z`. Setelah pertama kali, disc tersimpan di browser dan cukup klik "Main dengan disc tersimpan".
+
+   Membuat CHD dari cue/bin: `chdman createcd -i "Team Buddies.cue" -o "Team Buddies.chd"` (chdman dari MAME; di Windows bisa juga pakai namDHC). Hasilnya ±253 MB. Dibanding .7z: boot 6.5 s vs 85 s dan memori emulator 512 MB vs 1 GB (diukur di Chromium headless).
 2. Klik **Mulai game & buka room**. Akan muncul kode room dan link undangan.
 3. Teman membuka link tersebut (atau `/` → masukkan kode), lalu klik layar untuk mengaktifkan suara dan kontrol.
 4. Di dalam game, masuk ke mode multiplayer. Tiap pemain menekan START di slot multitap masing-masing.

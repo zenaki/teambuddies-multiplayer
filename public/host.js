@@ -57,7 +57,8 @@ $("#cachedPlay").onclick = async () => {
     const files = await DiscCache.files();
     if (!files) throw new Error("Disc tersimpan rusak atau tidak lengkap. Hapus lalu pilih file lagi.");
     loadedFromCache = true;
-    const game = await buildStoreZip(files, setProgress);
+    // a single image (.chd/.pbp) goes straight to the emulator; cue+bin sets are wrapped in a zip
+    const game = files.length === 1 ? files[0] : await buildStoreZip(files, setProgress);
     $("#setup").classList.add("hidden"); $("#session").classList.remove("hidden");
     startEmulator(game);
   } catch (e) { $("#setupErr").textContent = e.message; $("#cachedPlay").disabled = false; }
@@ -70,6 +71,12 @@ async function cacheDisc() {
   const say = t => { $("#discStatus").textContent = t; };
   try {
     const FS = emu().gameManager.FS, cueName = String(emu().fileName || "").replace(/^\//, "");
+    if (/\.(chd|pbp)$/i.test(cueName)) { // single-file image: keep it as is
+      const node = FS.lookupPath("/" + cueName).node;
+      await DiscCache.save([{ name: cueName.split("/").pop(), data: node.contents.subarray(0, node.usedBytes) }], p => say(`Menyimpan disc di browser… ${Math.round(p * 100)}%`));
+      say("💾 Disc tersimpan di browser ini. Lain kali tinggal klik \"Main dengan disc tersimpan\".");
+      return;
+    }
     if (!/\.cue$/i.test(cueName)) return;
     const cueBytes = FS.readFile("/" + cueName);
     const dir = cueName.includes("/") ? cueName.slice(0, cueName.lastIndexOf("/") + 1) : "";

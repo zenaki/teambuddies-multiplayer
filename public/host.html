@@ -10,7 +10,7 @@
 <main class="wrap">
   <section id="setup" class="card" style="max-width:640px;margin:0 auto">
     <h2>Muat disc game</h2>
-    <p class="muted">Pilih <b>.cue + semua .bin</b>-nya sekaligus, atau satu arsip <b>.zip / .7z</b> yang berisi keduanya. File hanya dibaca oleh browsermu.</p>
+    <p class="muted">Paling ringan: satu file <b>.chd</b> (disarankan, wajib untuk HP/iPad). Bisa juga <b>.cue + semua .bin</b> sekaligus, atau arsip <b>.zip / .7z</b>. File hanya dibaca oleh browsermu.</p>
     <div id="cachedBox" class="cached hidden">
       <div><b>💾 Disc tersimpan di browser ini</b> <span id="cachedInfo" class="muted"></span></div>
       <div class="row" style="margin-top:8px">
@@ -20,7 +20,7 @@
       <p class="muted" style="margin:8px 0 0"><small>Atau pilih file lain di bawah.</small></p>
     </div>
     <div id="drop" class="drop">Seret file ke sini, atau
-      <label class="btn" style="display:inline-flex;margin:8px 0 0;color:var(--text)">Pilih file<input id="file" type="file" multiple accept=".cue,.bin,.img,.zip,.7z,.pbp,.m3u,.ccd" hidden></label>
+      <label class="btn" style="display:inline-flex;margin:8px 0 0;color:var(--text)">Pilih file<input id="file" type="file" multiple accept=".chd,.cue,.bin,.img,.zip,.7z,.pbp,.m3u,.ccd" hidden></label>
     </div>
     <ul id="fileList" class="files"></ul>
     <div class="progress hidden" id="prog"><div></div></div>
