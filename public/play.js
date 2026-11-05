@@ -23,6 +23,9 @@ $("#focusBtn").onclick = () => {
   localStorageSet("tb-focus", view.focus ? "1" : "0");
   fitScreen();
 };
+$("#tagsChk").onchange = e => { view.showTags = e.target.checked; localStorageSet("tb-tags", e.target.checked ? "1" : "0"); };
+try { view.showTags = localStorage.getItem("tb-tags") !== "0"; } catch {}
+$("#tagsChk").checked = view.showTags;
 $("#radarChk").onchange = e => { view.radar = e.target.checked; localStorageSet("tb-radar", view.radar ? "1" : "0"); };
 const status = t => { $("#status").textContent = t; };
 
@@ -84,6 +87,8 @@ async function join(room, name) {
       ch.onmessage = ev => {
         let m; try { m = JSON.parse(ev.data); } catch { return; }
         if (m.t === "welcome" || m.t === "layout") setLayout(m.layout || "full");
+        if (m.names) view.setNames(m.names);
+        if (m.t === "tags") view.setTags(m.p);
         if (m.t === "pong") {
           const ms = Math.round(performance.now() - m.ts);
           $("#rtt").textContent = `${ms} ms`; $("#rtt").classList.remove("hidden");

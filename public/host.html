@@ -17,6 +17,8 @@
     <ul id="fileList" class="files"></ul>
     <div class="progress hidden" id="prog"><div></div></div>
     <p id="setupErr" class="err"></p>
+    <label for="hostName">Nama kamu (tampil di atas karaktermu)</label>
+    <input id="hostName" type="text" maxlength="24" placeholder="Host" style="max-width:260px">
     <p><button id="startBtn" class="primary" disabled>Mulai game &amp; buka room</button></p>
     <p class="muted"><small>Multitap di port 1 otomatis aktif, jadi pemain 1–4 terhubung ke multitap. Di Team Buddies, pilih mode multiplayer lalu tiap pemain menekan START.</small></p>
   </section>
@@ -32,6 +34,7 @@
         <span class="muted">Tampilan:</span>
         <button id="focusBtn" class="small toggle on" aria-pressed="true">Fokus ke layarku</button>
         <label class="inline"><input id="radarChk" type="checkbox" checked> Radar</label>
+        <label class="inline"><input id="tagsChk" type="checkbox" checked> Nama</label>
         <span class="sp"></span>
         <label class="inline muted" for="layoutSel">Layout</label>
         <select id="layoutSel">

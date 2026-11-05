@@ -97,7 +97,18 @@ function buildMediaStream() {
   return stream;
 }
 
-let detector, hostView, currentLayout = "full";
+let detector, hostView, currentLayout = "full", lastTags = {};
+let hostName = "";
+try { hostName = localStorage.getItem("tb-name") || ""; } catch {}
+$("#hostName").value = hostName;
+$("#hostName").oninput = e => { hostName = e.target.value.trim(); try { localStorage.setItem("tb-name", hostName); } catch {} };
+// slot -> display name for every human player; viewports without an entry are bots
+function playerNames() {
+  const n = { 1: hostName || "Host" };
+  for (const p of peers.values()) if (p.pc.connectionState !== "failed") n[p.slot] = p.name;
+  return n;
+}
+function sendNames() { const names = playerNames(); if (hostView) hostView.setNames(names); broadcast({ t: "names", names }); }
 function setupFocusView() {
   const lv = $("#localVideo");
   lv.srcObject = new MediaStream(mediaStream.getVideoTracks());
@@ -111,11 +122,16 @@ function setupFocusView() {
     updateOverlay();
     broadcast({ t: "layout", layout });
   });
+  hostView.setNames(playerNames());
+  new MarkerTracker(lv, () => currentLayout, tags => {
+    lastTags = tags; hostView.setTags(tags);
+    broadcast({ t: "tags", p: tags });
+  });
 }
 // Only cover the emulator canvas when a split-screen is on and focus is wanted;
 // menus keep the direct (zero extra latency) emulator canvas.
 function updateOverlay() {
-  const show = hostView && hostView.focus && currentLayout !== "full";
+  const show = hostView && currentLayout !== "full"; // focus off still shows the full frame with name tags
   $("#focusCanvas").classList.toggle("hidden", !show);
 }
 function broadcast(msg) {
@@ -128,6 +144,7 @@ $("#focusBtn").onclick = () => {
   $("#focusBtn").setAttribute("aria-pressed", hostView.focus);
   updateOverlay();
 };
+$("#tagsChk").onchange = e => { if (hostView) hostView.showTags = e.target.checked; };
 $("#radarChk").onchange = e => { if (hostView) hostView.radar = e.target.checked; };
 $("#layoutSel").onchange = e => detector && detector.setOverride(e.target.value);
 
@@ -159,13 +176,14 @@ async function connectGuest({ id, name, slot }) {
   const pc = new RTCPeerConnection(rtcConfig);
   const peer = { pc, slot, name, rtt: null, lastSeen: 0, state: { seq: -1, buttons: 0, axes: [0, 0, 0, 0] } };
   peers.set(id, peer);
+  setTimeout(sendNames, 0);
 
   for (const track of mediaStream.getTracks()) pc.addTrack(track, mediaStream);
   peer.input = pc.createDataChannel("input", { ordered: false, maxRetransmits: 0 });
   peer.input.binaryType = "arraybuffer";
   peer.input.onmessage = e => applyInput(peer, InputPacket.decode(e.data));
   peer.ctrl = pc.createDataChannel("ctrl");
-  peer.ctrl.onopen = () => peer.ctrl.send(JSON.stringify({ t: "welcome", slot, layout: currentLayout }));
+  peer.ctrl.onopen = () => peer.ctrl.send(JSON.stringify({ t: "welcome", slot, layout: currentLayout, names: playerNames() }));
   peer.ctrl.onmessage = e => {
     peer.lastSeen = performance.now();
     let m; try { m = JSON.parse(e.data); } catch { return; }
@@ -217,6 +235,7 @@ setInterval(() => {
 }, 2000);
 
 function dropGuest(id) {
+  setTimeout(sendNames, 0);
   const peer = peers.get(id);
   if (!peer) return;
   releaseAll(peer);
@@ -250,7 +269,7 @@ function releaseAll(peer) { // never leave a disconnected player holding a butto
 
 // ---------- 5. Player list ----------
 function renderPlayers() {
-  const rows = ['<li><span class="dot p1"></span><span class="name">Kamu (host)</span><span class="pill">P1</span></li>'];
+  const rows = [`<li><span class="dot p1"></span><span class="name">${(hostName || "Host").replace(/[<&]/g, "")} (kamu)</span><span class="pill">P1</span></li>`];
   for (const [id, p] of [...peers.entries()].sort((a, b) => a[1].slot - b[1].slot)) {
     const st = p.pc.connectionState;
     const cls = st === "connected" ? "ok" : (st === "failed" ? "bad" : "");
