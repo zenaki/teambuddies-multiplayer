@@ -189,6 +189,8 @@ function fmtBytes(n) { return n > 1 << 20 ? (n / (1 << 20)).toFixed(0) + " MB" :
     el.textContent = `v${v.version} · ${v.commit}` + (v.date ? ` · ${v.date}` : "");
     const hdr = document.querySelector("header.top");
     if (hdr) hdr.appendChild(el);
+    const hud = document.getElementById("hudPill"); // fullscreen phone view (header hidden)
+    if (hud) { const p = document.createElement("span"); p.className = "pill"; p.textContent = `v${v.version} · ${v.commit}`; hud.appendChild(p); }
   } catch {}
 })();
 
