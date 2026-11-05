@@ -148,28 +148,15 @@ function inviteUrl(room) { return new URL(`play.html?room=${room}`, location.hre
 
 // ---- Minimal STORE (uncompressed) ZIP writer --------------------------------
 // Lets the host pick loose .cue + .bin files; EmulatorJS then unpacks the zip and boots the .cue.
-const CRC_TABLE = (() => {
-  const t = new Uint32Array(256);
-  for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
-  return t;
-})();
-async function crc32File(file, onProgress) {
-  let crc = 0xffffffff; const CHUNK = 16 << 20;
-  for (let off = 0; off < file.size; off += CHUNK) {
-    const u8 = new Uint8Array(await file.slice(off, off + CHUNK).arrayBuffer());
-    for (let i = 0; i < u8.length; i++) crc = CRC_TABLE[(crc ^ u8[i]) & 0xff] ^ (crc >>> 8);
-    onProgress && onProgress(Math.min(file.size, off + CHUNK));
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
+
 async function buildStoreZip(files, onProgress) {
   const enc = new TextEncoder(), parts = [], central = [];
   const total = files.reduce((s, f) => s + f.size, 0); let done = 0, offset = 0;
   for (const f of files) {
     if (f.size >= 0xffffffff) throw new Error(`${f.name} terlalu besar untuk ZIP biasa`);
     const name = enc.encode(f.name);
-    const crc = await crc32File(f, n => onProgress && onProgress((done + n) / total));
-    done += f.size;
+    const crc = 0; // EmulatorJS' unzip doesn't verify CRCs; skipping avoids reading 500 MB up front
+    done += f.size; onProgress && onProgress(done / total);
     const lh = new DataView(new ArrayBuffer(30));
     lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 10, true); lh.setUint16(6, 0x0800, true);
     lh.setUint16(8, 0, true); lh.setUint32(14, crc, true); lh.setUint32(18, f.size, true);
@@ -191,3 +178,57 @@ async function buildStoreZip(files, onProgress) {
 
 const $ = sel => document.querySelector(sel);
 function fmtBytes(n) { return n > 1 << 20 ? (n / (1 << 20)).toFixed(0) + " MB" : (n / 1024).toFixed(0) + " KB"; }
+
+// ---- App version (shown in the header so you can tell an update arrived) -----
+(async () => {
+  try {
+    const r = await fetch("version.json", { cache: "no-store" });
+    if (!r.ok) return;
+    const v = await r.json(), el = document.createElement("span");
+    el.className = "status appver"; el.title = "Versi aplikasi";
+    el.textContent = `v${v.version} · ${v.commit}` + (v.date ? ` · ${v.date}` : "");
+    const hdr = document.querySelector("header.top");
+    if (hdr) hdr.appendChild(el);
+  } catch {}
+})();
+
+// ---- Disc cache in the browser's private storage (OPFS) -------------------------
+// After the first boot the unpacked .cue/.bin are kept on this device, so later sessions start
+// without picking the file again or waiting for the 7z to decompress. Never leaves the device.
+const DiscCache = {
+  supported() { return !!(navigator.storage && navigator.storage.getDirectory && window.FileSystemFileHandle && "createWritable" in FileSystemFileHandle.prototype); },
+  async dir(create) { return (await navigator.storage.getDirectory()).getDirectoryHandle("disc", { create }); },
+  async meta() {
+    try { const f = await (await (await this.dir(false)).getFileHandle("meta.json")).getFile(); return JSON.parse(await f.text()); }
+    catch { return null; }
+  },
+  async files() {
+    const m = await this.meta(); if (!m) return null;
+    const d = await this.dir(false), out = [];
+    for (const e of m.files) {
+      const f = await (await d.getFileHandle(e.name)).getFile();
+      if (f.size !== e.size) return null;
+      out.push(f);
+    }
+    return out;
+  },
+  async clear() { try { await (await navigator.storage.getDirectory()).removeEntry("disc", { recursive: true }); } catch {} },
+  // entries: [{ name, data: Uint8Array }]; meta.json is written last so a half-written save is ignored
+  async save(entries, onProgress) {
+    await this.clear();
+    const d = await this.dir(true), CH = 8 << 20, total = entries.reduce((s, e) => s + e.data.length, 0);
+    let done = 0;
+    for (const e of entries) {
+      const w = await (await d.getFileHandle(e.name, { create: true })).createWritable();
+      for (let o = 0; o < e.data.length; o += CH) {
+        await w.write(e.data.slice(o, o + CH));
+        done += Math.min(CH, e.data.length - o); onProgress && onProgress(done / total);
+      }
+      await w.close();
+    }
+    const meta = { savedAt: new Date().toISOString(), files: entries.map(e => ({ name: e.name, size: e.data.length })) };
+    const w = await (await d.getFileHandle("meta.json", { create: true })).createWritable();
+    await w.write(JSON.stringify(meta)); await w.close();
+    return meta;
+  },
+};

@@ -43,6 +43,17 @@ if (process.env.PEER_HOST) {
 fs.writeFileSync(path.join(OUT, "config.json"), JSON.stringify({ signaling: "peerjs", peerPrefix: "tbweb-", peer, iceServers: ice }, null, 2) + "\n");
 fs.writeFileSync(path.join(OUT, ".nojekyll"), ""); // serve files as-is
 
+// Version shown in every page header, and cache-busting so browsers pick up new JS/CSS at once
+let commit = (process.env.GITHUB_SHA || "").slice(0, 7);
+if (!commit) try { commit = require("child_process").execSync("git rev-parse --short HEAD", { cwd: ROOT }).toString().trim(); } catch { commit = "dev"; }
+const version = { version: require(path.join(ROOT, "package.json")).version, commit, date: new Date().toISOString().slice(0, 10) };
+fs.writeFileSync(path.join(OUT, "version.json"), JSON.stringify(version) + "\n");
+for (const f of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
+  const p = path.join(OUT, f);
+  fs.writeFileSync(p, fs.readFileSync(p, "utf8").replace(/(src|href)="([\w./-]+\.(?:js|css))"/g, `$1="$2?v=${commit}"`));
+}
+console.log("version", JSON.stringify(version));
+
 let bytes = 0, files = 0;
 (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else { files++; bytes += fs.statSync(p).size; } } })(OUT);
 console.log(`dist/ ready: ${files} files, ${(bytes / 1048576).toFixed(1)} MB`);

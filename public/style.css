@@ -62,3 +62,7 @@ select { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); ba
 button.toggle.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .screen canvas.view { position: absolute; inset: 0; width: 100%; height: 100%; }
 .screen video.probe { position: absolute; }
+
+.cached { border: 1px solid var(--accent); background: rgba(245,179,1,.08); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+.appver { font-size: 11px; opacity: .8; margin-left: 10px; white-space: nowrap; }
+@media (max-width: 520px) { .appver { display: none; } }

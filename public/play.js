@@ -24,10 +24,10 @@ $("#focusBtn").onclick = () => {
   localStorageSet("tb-focus", view.focus ? "1" : "0");
   fitScreen();
 };
+$("#radarChk").onchange = e => { view.radar = e.target.checked; localStorageSet("tb-radar", view.radar ? "1" : "0"); };
 $("#tagsChk").onchange = e => { view.showTags = e.target.checked; localStorageSet("tb-tags", e.target.checked ? "1" : "0"); };
 try { view.showTags = localStorage.getItem("tb-tags") !== "0"; } catch {}
 $("#tagsChk").checked = view.showTags;
-$("#radarChk").onchange = e => { view.radar = e.target.checked; localStorageSet("tb-radar", view.radar ? "1" : "0"); };
 const status = t => { $("#status").textContent = t; };
 
 $("#joinForm").onsubmit = async e => {
@@ -148,8 +148,10 @@ addEventListener("blur", () => keysDown.clear());
 // Touch buttons: each keeps its own pointer, so several can be held at once.
 for (const b of document.querySelectorAll("#touch button")) {
   const id = Number(b.dataset.b);
-  const on = e => { e.preventDefault(); b.setPointerCapture && b.setPointerCapture(e.pointerId); touchDown.add(id); b.classList.add("on"); if (navigator.vibrate) navigator.vibrate(8); };
-  const off = e => { e.preventDefault(); touchDown.delete(id); b.classList.remove("on"); };
+  let downAt = 0;
+  const on = e => { e.preventDefault(); b.setPointerCapture && b.setPointerCapture(e.pointerId); downAt = performance.now(); touchDown.add(id); b.classList.add("on"); if (navigator.vibrate) navigator.vibrate(8); };
+  // a quick tap must still reach the game: keep it held for at least ~4 frames
+  const off = e => { e.preventDefault(); const wait = Math.max(0, 70 - (performance.now() - downAt)); setTimeout(() => { touchDown.delete(id); b.classList.remove("on"); }, wait); };
   b.addEventListener("pointerdown", on); b.addEventListener("pointerup", off);
   b.addEventListener("pointercancel", off); b.addEventListener("lostpointercapture", off);
   b.addEventListener("contextmenu", e => e.preventDefault());

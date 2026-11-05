@@ -23,6 +23,12 @@ const MIME = {
   ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon",
 };
 
+const VERSION = (() => {
+  let commit = process.env.GIT_COMMIT || "dev";
+  try { commit = require("child_process").execSync("git rev-parse --short HEAD", { cwd: __dirname, stdio: ["ignore", "pipe", "ignore"] }).toString().trim(); } catch {}
+  return { version: require("./package.json").version, commit, date: new Date().toISOString().slice(0, 10) };
+})();
+
 // ICE servers for WebRTC. STUN is enough on most home networks; set TURN_* env vars for strict NATs.
 function iceConfig() {
   const ice = [{ urls: (process.env.STUN_URLS || "stun:stun.l.google.com:19302").split(",") }];
@@ -55,6 +61,10 @@ function serveStatic(req, res) {
     return res.end(JSON.stringify(iceConfig()));
   }
   if (pathname === "/healthz") { res.writeHead(200); return res.end("ok"); }
+  if (pathname === "/version.json") {
+    res.writeHead(200, { "Content-Type": MIME[".json"], "Cache-Control": "no-store" });
+    return res.end(JSON.stringify(VERSION));
+  }
   if (pathname.endsWith("/")) pathname += "index.html";
   for (const [prefix, dir] of ROOTS) {
     if (!pathname.startsWith(prefix)) continue;

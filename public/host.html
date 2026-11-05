@@ -11,6 +11,14 @@
   <section id="setup" class="card" style="max-width:640px;margin:0 auto">
     <h2>Muat disc game</h2>
     <p class="muted">Pilih <b>.cue + semua .bin</b>-nya sekaligus, atau satu arsip <b>.zip / .7z</b> yang berisi keduanya. File hanya dibaca oleh browsermu.</p>
+    <div id="cachedBox" class="cached hidden">
+      <div><b>💾 Disc tersimpan di browser ini</b> <span id="cachedInfo" class="muted"></span></div>
+      <div class="row" style="margin-top:8px">
+        <button id="cachedPlay" class="primary">Main dengan disc tersimpan</button>
+        <button id="cachedDel" class="small">Hapus dari browser</button>
+      </div>
+      <p class="muted" style="margin:8px 0 0"><small>Atau pilih file lain di bawah.</small></p>
+    </div>
     <div id="drop" class="drop">Seret file ke sini, atau
       <label class="btn" style="display:inline-flex;margin:8px 0 0;color:var(--text)">Pilih file<input id="file" type="file" multiple accept=".cue,.bin,.img,.zip,.7z,.pbp,.m3u,.ccd" hidden></label>
     </div>
@@ -51,6 +59,7 @@
       <div class="card">
         <h2>Undang teman</h2>
         <div id="roomCode" class="invite">-----</div>
+        <p id="discStatus" class="status" style="margin:6px 0 0"></p>
         <div class="row" style="margin-top:8px">
           <input id="inviteUrl" type="text" readonly>
           <button id="copyBtn" class="small">Salin link</button>

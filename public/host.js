@@ -39,6 +39,55 @@ async function prepareGameFile(files) {
   return buildStoreZip(files, setProgress); // EmulatorJS unpacks it and boots the .cue
 }
 
+// ---- Disc kept in this browser (OPFS) ----
+let loadedFromCache = false;
+async function showCachedDisc() {
+  if (!DiscCache.supported()) return;
+  const m = await DiscCache.meta();
+  $("#cachedBox").classList.toggle("hidden", !m);
+  if (m) {
+    const size = m.files.reduce((s, f) => s + f.size, 0);
+    $("#cachedInfo").textContent = `(${m.files.find(f => /\.cue$/i.test(f.name))?.name || m.files[0].name}, ${fmtBytes(size)})`;
+  }
+}
+showCachedDisc();
+$("#cachedPlay").onclick = async () => {
+  $("#cachedPlay").disabled = true;
+  try {
+    const files = await DiscCache.files();
+    if (!files) throw new Error("Disc tersimpan rusak atau tidak lengkap. Hapus lalu pilih file lagi.");
+    loadedFromCache = true;
+    const game = await buildStoreZip(files, setProgress);
+    $("#setup").classList.add("hidden"); $("#session").classList.remove("hidden");
+    startEmulator(game);
+  } catch (e) { $("#setupErr").textContent = e.message; $("#cachedPlay").disabled = false; }
+};
+$("#cachedDel").onclick = async () => { await DiscCache.clear(); showCachedDisc(); };
+
+// After a boot from picked files, copy the unpacked .cue/.bin out of the emulator into OPFS.
+async function cacheDisc() {
+  if (loadedFromCache || !DiscCache.supported()) return;
+  const say = t => { $("#discStatus").textContent = t; };
+  try {
+    const FS = emu().gameManager.FS, cueName = String(emu().fileName || "").replace(/^\//, "");
+    if (!/\.cue$/i.test(cueName)) return;
+    const cueBytes = FS.readFile("/" + cueName);
+    const dir = cueName.includes("/") ? cueName.slice(0, cueName.lastIndexOf("/") + 1) : "";
+    const tracks = [...new TextDecoder().decode(cueBytes).matchAll(/FILE\s+"([^"]+)"/gi)].map(m => m[1]);
+    const entries = [{ name: cueName.split("/").pop(), data: cueBytes }];
+    for (const t of tracks) {
+      const node = FS.lookupPath("/" + dir + t).node;
+      entries.push({ name: t, data: node.contents.subarray(0, node.usedBytes) });
+    }
+    const need = entries.reduce((s, e) => s + e.data.length, 0);
+    const est = navigator.storage.estimate ? await navigator.storage.estimate() : null;
+    if (est && est.quota - est.usage < need * 1.05) { say("Ruang penyimpanan browser tidak cukup untuk menyimpan disc."); return; }
+    if (navigator.storage.persist) navigator.storage.persist().catch(() => {});
+    await DiscCache.save(entries, p => say(`Menyimpan disc di browser… ${Math.round(p * 100)}%`));
+    say("💾 Disc tersimpan di browser ini. Lain kali tinggal klik \"Main dengan disc tersimpan\".");
+  } catch (e) { say("Disc tidak bisa disimpan di browser: " + e.message); }
+}
+
 $("#startBtn").onclick = async () => {
   $("#startBtn").disabled = true;
   try {
@@ -164,12 +213,13 @@ $("#focusBtn").onclick = () => {
   $("#focusBtn").setAttribute("aria-pressed", hostView.focus);
   updateOverlay();
 };
-$("#tagsChk").onchange = e => { if (hostView) hostView.showTags = e.target.checked; };
 $("#radarChk").onchange = e => { if (hostView) hostView.radar = e.target.checked; };
+$("#tagsChk").onchange = e => { if (hostView) hostView.showTags = e.target.checked; };
 $("#layoutSel").onchange = e => detector && detector.setOverride(e.target.value);
 
 async function onGameStart() {
   mediaStream = buildMediaStream();
+  setTimeout(cacheDisc, 3000); // let the game settle first
   setupFocusView();
   const cfg = await loadConfig();
   rtcConfig = { iceServers: cfg.iceServers };

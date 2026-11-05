@@ -1,6 +1,6 @@
 {
   "name": "teambuddies-multiplayer",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Team Buddies (PS1) di browser + multiplayer online via WebRTC",
   "main": "server.js",
   "scripts": {
