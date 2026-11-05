@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Buddies Host</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><a href="./" style="text-decoration:none;color:inherit"><h1>Team Buddies Web</h1></a><span class="sp"></span><span id="netStatus" class="status"></span></header>
+<main class="wrap">
+  <section id="setup" class="card" style="max-width:640px;margin:0 auto">
+    <h2>Muat disc game</h2>
+    <p class="muted">Pilih <b>.cue + semua .bin</b>-nya sekaligus, atau satu arsip <b>.zip / .7z</b> yang berisi keduanya. File hanya dibaca oleh browsermu.</p>
+    <div id="drop" class="drop">Seret file ke sini, atau
+      <label class="btn" style="display:inline-flex;margin:8px 0 0;color:var(--text)">Pilih file<input id="file" type="file" multiple accept=".cue,.bin,.img,.zip,.7z,.pbp,.m3u,.ccd" hidden></label>
+    </div>
+    <ul id="fileList" class="files"></ul>
+    <div class="progress hidden" id="prog"><div></div></div>
+    <p id="setupErr" class="err"></p>
+    <p><button id="startBtn" class="primary" disabled>Mulai game &amp; buka room</button></p>
+    <p class="muted"><small>Multitap di port 1 otomatis aktif, jadi pemain 1–4 terhubung ke multitap. Di Team Buddies, pilih mode multiplayer lalu tiap pemain menekan START.</small></p>
+  </section>
+
+  <section id="session" class="grid two hidden">
+    <div><div id="game"></div></div>
+    <aside class="grid" style="align-content:start">
+      <div class="card">
+        <h2>Undang teman</h2>
+        <div id="roomCode" class="invite">-----</div>
+        <div class="row" style="margin-top:8px">
+          <input id="inviteUrl" type="text" readonly>
+          <button id="copyBtn" class="small">Salin link</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Pemain</h2>
+        <ul id="players" class="players">
+          <li><span class="dot p1"></span><span class="name">Kamu (host)</span><span class="pill">P1</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Kontrol keyboard</h2>
+        <table class="keys">
+          <tr><td>D-pad</td><td>← ↑ → ↓</td></tr>
+          <tr><td>✕ / ○ / □ / △</td><td>X / Z / S / A</td></tr>
+          <tr><td>L1 / R1 / L2 / R2</td><td>Q / E / Tab / R</td></tr>
+          <tr><td>Start / Select</td><td>Enter / V</td></tr>
+        </table>
+        <p class="muted"><small>Gamepad juga didukung. Klik layar game dulu supaya keyboard tertangkap.</small></p>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script src="common.js"></script>
+<script src="host.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Team Buddies Join</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .touch { display: none; user-select: none; -webkit-user-select: none; touch-action: none; margin-top: 12px; }
+  body.is-touch .touch { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .tpad { display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); gap: 4px; }
+  .tpad button, .tmid button { padding: 0; font-size: 20px; border-radius: 12px; }
+  .tpad button.on, .tmid button.on { background: var(--accent); color: var(--accent-ink); }
+  .tmid { display: flex; flex-direction: column; gap: 8px; }
+  .tmid button { width: 72px; height: 36px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header class="top"><a href="./" style="text-decoration:none;color:inherit"><h1>Team Buddies Web</h1></a><span class="sp"></span><span id="you" class="pill hidden"></span><span id="rtt" class="pill hidden"></span></header>
+<main class="wrap grid two">
+  <div>
+    <div class="screen">
+      <video id="video" autoplay playsinline muted></video>
+      <div id="overlay" class="overlay">
+        <form id="joinForm" class="card" style="width:min(360px,100%);text-align:left">
+          <h2>Gabung ke room</h2>
+          <label for="room">Kode room</label>
+          <input id="room" class="code" type="text" maxlength="5" autocomplete="off" required>
+          <label for="name">Nama</label>
+          <input id="name" type="text" maxlength="24" placeholder="Player">
+          <p><button class="primary" type="submit">Gabung</button></p>
+          <p id="err" class="err"></p>
+        </form>
+        <div id="waiting" class="hidden"><p id="waitMsg">Menghubungkan…</p></div>
+        <button id="unmute" class="primary hidden">Klik untuk mulai (aktifkan suara &amp; kontrol)</button>
+      </div>
+    </div>
+    <div class="touch" id="touch">
+      <div class="tpad">
+        <span></span><button data-b="4">▲</button><span></span>
+        <button data-b="6">◀</button><span></span><button data-b="7">▶</button>
+        <span></span><button data-b="5">▼</button><span></span>
+      </div>
+      <div class="tmid"><button data-b="10">L1</button><button data-b="2">SELECT</button><button data-b="3">START</button><button data-b="11">R1</button></div>
+      <div class="tpad">
+        <span></span><button data-b="9">△</button><span></span>
+        <button data-b="1">□</button><span></span><button data-b="8">○</button>
+        <span></span><button data-b="0">✕</button><span></span>
+      </div>
+    </div>
+  </div>
+  <aside class="grid" style="align-content:start">
+    <div class="card">
+      <h2>Kontrol</h2>
+      <table class="keys">
+        <tr><td>D-pad</td><td>← ↑ → ↓</td></tr>
+        <tr><td>✕ / ○ / □ / △</td><td>X / Z / S / A</td></tr>
+        <tr><td>L1 / R1 / L2 / R2</td><td>Q / E / Tab / R</td></tr>
+        <tr><td>Start / Select</td><td>Enter / V</td></tr>
+        <tr><td>Analog kiri</td><td>T F G H</td></tr>
+      </table>
+      <p class="muted"><small>Gamepad USB/Bluetooth langsung terbaca. Di HP muncul tombol sentuh.</small></p>
+      <p><button id="fsBtn" class="small">Layar penuh</button></p>
+    </div>
+    <div class="card"><h2>Status</h2><p id="status" class="status">Belum terhubung</p><p id="padStatus" class="status"></p></div>
+  </aside>
+</main>
+<script src="common.js"></script>
+<script src="play.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+node_modules/
+# never commit game images
+*.bin
+*.cue
+*.iso
+*.7z
+*.zip
+*.chd
+*.pbp
+dist/

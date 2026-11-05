@@ -1,0 +1,25 @@
+{
+  "name": "teambuddies-multiplayer",
+  "version": "1.0.0",
+  "description": "Team Buddies (PS1) di browser + multiplayer online via WebRTC",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:static": "node scripts/build-static.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@emulatorjs/core-pcsx_rearmed": "^4.2.3",
+    "@emulatorjs/emulatorjs": "^4.2.3",
+    "peerjs": "^1.5.5",
+    "ws": "^8.22.1"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "peer": "^1.0.2"
+  }
+}

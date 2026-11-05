@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Buddies Web</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><h1>Team Buddies Web</h1><span class="sp"></span><small>PS1 · hingga 4 pemain</small></header>
+<main class="wrap grid half">
+  <section class="card">
+    <h2>Jadi host</h2>
+    <p class="muted">Muat disc Team Buddies milikmu sendiri dari komputer. Game berjalan di browsermu, lalu layarnya di-stream ke teman-teman. File game tidak pernah di-upload ke server.</p>
+    <a class="btn primary" href="host.html">Buat room</a>
+  </section>
+  <section class="card">
+    <h2>Gabung ke room</h2>
+    <p class="muted">Masukkan kode dari host. Kamu tidak perlu file game.</p>
+    <form action="play.html" method="get">
+      <label for="room">Kode room</label>
+      <input id="room" name="room" class="code" type="text" maxlength="5" autocomplete="off" required>
+      <label for="name">Nama</label>
+      <input id="name" name="name" type="text" maxlength="24" placeholder="Player">
+      <p><button class="primary" type="submit">Gabung</button></p>
+    </form>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+:root {
+  --bg: #12141a; --panel: #1c1f28; --line: #2c3040; --text: #e8eaf0; --muted: #9aa0b4;
+  --accent: #f5b301; --accent-ink: #1a1400; --ok: #3ccf7a; --bad: #ff5d5d;
+  --p1: #4aa3ff; --p2: #ff5d5d; --p3: #3ccf7a; --p4: #f5b301;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--accent); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 16px; }
+header.top { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+header.top h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
+header.top .sp { flex: 1; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.grid { display: grid; gap: 16px; }
+@media (min-width: 900px) { .grid.two { grid-template-columns: 1fr 320px; } .grid.half { grid-template-columns: 1fr 1fr; } }
+h2 { font-size: 16px; margin: 0 0 10px; }
+p.muted, .muted { color: var(--muted); }
+small { color: var(--muted); }
+label { display: block; margin: 10px 0 4px; color: var(--muted); font-size: 13px; }
+input[type=text] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: #10121a; color: var(--text); font-size: 16px; }
+input.code { text-transform: uppercase; letter-spacing: 4px; font-weight: 700; font-family: ui-monospace, monospace; }
+button, .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--line);
+  background: #262a36; color: var(--text); font-size: 15px; cursor: pointer; text-decoration: none; }
+button.primary, .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.small { padding: 4px 10px; font-size: 13px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.drop { border: 2px dashed var(--line); border-radius: 10px; padding: 22px; text-align: center; color: var(--muted); }
+.drop.over { border-color: var(--accent); color: var(--text); }
+ul.files { list-style: none; padding: 0; margin: 10px 0 0; font-family: ui-monospace, monospace; font-size: 13px; }
+.progress { height: 6px; background: #10121a; border-radius: 3px; overflow: hidden; margin-top: 10px; }
+.progress > div { height: 100%; width: 0; background: var(--accent); transition: width .1s; }
+#game { width: 100%; aspect-ratio: 4 / 3; background: #000; border-radius: 10px; overflow: hidden; }
+.screen { position: relative; width: 100%; aspect-ratio: 4 / 3; background: #000; border-radius: 10px; overflow: hidden; }
+.screen video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+.screen .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; text-align: center; padding: 16px; background: rgba(0,0,0,.6); }
+.hidden { display: none !important; }
+.invite { font-family: ui-monospace, monospace; font-size: 28px; font-weight: 800; letter-spacing: 6px; color: var(--accent); }
+.players { list-style: none; padding: 0; margin: 0; }
+.players li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.players li:last-child { border-bottom: 0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.p1 { background: var(--p1); } .p2 { background: var(--p2); } .p3 { background: var(--p3); } .p4 { background: var(--p4); }
+.players .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #10121a; border: 1px solid var(--line); color: var(--muted); }
+.pill.ok { color: var(--ok); } .pill.bad { color: var(--bad); }
+table.keys { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.keys td { padding: 3px 0; border-bottom: 1px solid var(--line); }
+table.keys td:last-child { text-align: right; font-family: ui-monospace, monospace; color: var(--muted); }
+kbd { background: #10121a; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 12px; }
+.err { color: var(--bad); }
+.status { font-size: 13px; color: var(--muted); }
