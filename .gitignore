@@ -8,3 +8,4 @@ node_modules/
 *.chd
 *.pbp
 dist/
+public/disc/

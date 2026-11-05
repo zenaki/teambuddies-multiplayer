@@ -19,6 +19,15 @@
       </div>
       <p class="muted" style="margin:8px 0 0"><small>Atau pilih file lain di bawah.</small></p>
     </div>
+    <div id="loginBox" class="cached hidden">
+      <div><b>🔒 Disc dari server</b> <span class="muted">(terenkripsi, perlu login)</span></div>
+      <div class="row" style="margin-top:8px">
+        <input id="discUser" type="text" placeholder="Username" autocomplete="username" style="max-width:180px">
+        <input id="discPass" type="password" placeholder="Password" autocomplete="current-password" style="max-width:220px;width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:#10121a;color:var(--text);font-size:16px">
+        <button id="discLogin" class="primary">Masuk &amp; main</button>
+      </div>
+      <p id="loginMsg" class="status" style="margin:6px 0 0"></p>
+    </div>
     <div id="drop" class="drop">Seret file ke sini, atau
       <label class="btn" style="display:inline-flex;margin:8px 0 0;color:var(--text)">Pilih file<input id="file" type="file" multiple accept=".chd,.cue,.bin,.img,.zip,.7z,.pbp,.m3u,.ccd" hidden></label>
     </div>

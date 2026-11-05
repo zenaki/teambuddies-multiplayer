@@ -33,6 +33,16 @@ jobs:
           TURN_USER: ${{ vars.TURN_USER }}
           TURN_PASS: ${{ secrets.TURN_PASS }}
           PEER_HOST: ${{ vars.PEER_HOST }}
+      # optional encrypted disc (branch "disc-data"); delete that branch to take the disc down
+      - name: Add encrypted disc
+        run: |
+          if git ls-remote --exit-code origin disc-data >/dev/null 2>&1; then
+            git fetch --depth=1 origin disc-data
+            mkdir -p dist/disc && git archive FETCH_HEAD disc | tar -x -C dist
+            ls -la dist/disc | head
+          else
+            echo "no disc-data branch: site has no server disc"
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

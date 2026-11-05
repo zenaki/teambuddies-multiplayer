@@ -68,6 +68,11 @@ Opsional (lewat **Settings → Secrets and variables → Actions**):
 
 Catatan: broker publik PeerJS gratis tapi tanpa jaminan uptime. Nilai `TURN_PASS` ikut masuk ke `config.json` publik (memang begitu cara kerja WebRTC), jadi gunakan kredensial TURN yang terbatas, bukan password penting.
 
+## Disc terenkripsi di server (opsional)
+
+Untuk perangkat yang sulit menerima file (mis. iPhone), situs bisa membawa disc dalam bentuk terenkripsi:
+`node scripts/encrypt-disc.js "Team Buddies.chd" out/disc <username> <password>`, lalu push isi `out/` ke branch **`disc-data`** (berisi folder `disc/`). Workflow Pages menyalinnya ke situs, dan halaman host menampilkan form login. Browser mengunduh potongan AES-256-GCM, mendekripsinya dengan kunci dari PBKDF2(username + password, 600k iterasi), lalu menyimpannya di OPFS. Tanpa login, potongan itu tidak bisa dibaca. **Untuk menurunkannya:** hapus branch `disc-data` dan jalankan ulang workflow.
+
 ## Main lewat internet (dengan server.js)
 
 Server harus bisa diakses teman-teman, dan sebaiknya lewat **HTTPS**: Gamepad API dan tombol salin link hanya aktif di secure context, sementara `localhost` dianggap aman.

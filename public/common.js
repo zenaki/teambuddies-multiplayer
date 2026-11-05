@@ -214,6 +214,17 @@ const DiscCache = {
     }
     return out;
   },
+  // one file given as several chunks (decrypted download) -> written without joining them in memory
+  async saveChunks(name, chunks, onProgress) {
+    await this.clear();
+    const d = await this.dir(true), total = chunks.reduce((s, c) => s + c.length, 0);
+    const w = await (await d.getFileHandle(name, { create: true })).createWritable();
+    let done = 0;
+    for (const c of chunks) { await w.write(c); done += c.length; onProgress && onProgress(done / total); }
+    await w.close();
+    const mw = await (await d.getFileHandle("meta.json", { create: true })).createWritable();
+    await mw.write(JSON.stringify({ savedAt: new Date().toISOString(), files: [{ name, size: total }] })); await mw.close();
+  },
   async clear() { try { await (await navigator.storage.getDirectory()).removeEntry("disc", { recursive: true }); } catch {} },
   // entries: [{ name, data: Uint8Array }]; meta.json is written last so a half-written save is ignored
   async save(entries, onProgress) {

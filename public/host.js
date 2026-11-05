@@ -63,6 +63,52 @@ $("#cachedPlay").onclick = async () => {
     startEmulator(game);
   } catch (e) { $("#setupErr").textContent = e.message; $("#cachedPlay").disabled = false; }
 };
+// ---- Encrypted disc on the server (login) ----
+// The site may carry the disc as AES-GCM parts (disc/manifest.json). The key is derived from the
+// username + password in the browser; parts are decrypted straight into the browser's disc cache.
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+let discManifest = null;
+fetch("disc/manifest.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(m => {
+  discManifest = m; if (m) $("#loginBox").classList.remove("hidden");
+}).catch(() => {});
+async function discKey(user, pass) {
+  const k = discManifest.kdf;
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(`${user}\n${pass}`), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", hash: k.hash, iterations: k.iterations, salt: b64(k.salt) }, base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+}
+$("#discLogin").onclick = async () => {
+  const say = t => { $("#loginMsg").textContent = t; };
+  $("#discLogin").disabled = true;
+  try {
+    say("Memeriksa login…");
+    const key = await discKey($("#discUser").value.trim(), $("#discPass").value);
+    try { await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(discManifest.check.iv) }, key, b64(discManifest.check.data)); }
+    catch { throw new Error("Username atau password salah."); }
+    const m = discManifest, chunks = [];
+    let got = 0;
+    for (const p of m.parts) {
+      say(`Mengunduh & membuka disc… ${Math.round(got / m.size * 100)}%`);
+      const r = await fetch("disc/" + p.file);
+      if (!r.ok) throw new Error(`Gagal mengunduh ${p.file} (${r.status})`);
+      const plain = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(p.iv) }, key, await r.arrayBuffer()));
+      chunks.push(plain); got += plain.length;
+    }
+    if (got !== m.size) throw new Error("Ukuran disc tidak cocok.");
+    say("Menyimpan disc di browser…");
+    let file = null;
+    if (DiscCache.supported()) {
+      try {
+        await DiscCache.saveChunks(m.name, chunks, p => say(`Menyimpan disc di browser… ${Math.round(p * 100)}%`));
+        chunks.length = 0;
+        file = (await DiscCache.files())[0];
+      } catch {}
+    }
+    if (!file) file = new File(chunks, m.name);
+    loadedFromCache = true;
+    $("#setup").classList.add("hidden"); $("#session").classList.remove("hidden");
+    startEmulator(file);
+  } catch (e) { say(e.message); $("#discLogin").disabled = false; }
+};
 $("#cachedDel").onclick = async () => { await DiscCache.clear(); showCachedDisc(); };
 
 // After a boot from picked files, copy the unpacked .cue/.bin out of the emulator into OPFS.
