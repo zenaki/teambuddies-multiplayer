@@ -102,7 +102,18 @@ $("#startBtn").onclick = async () => {
 };
 
 // ---------- 2. Emulator ----------
+// If the tab dies while loading the disc (phones kill tabs that use too much memory and reload
+// them), the next load finds this flag and explains what happened.
+try {
+  if (sessionStorage.getItem("tb-booting")) {
+    sessionStorage.removeItem("tb-booting");
+    $("#setupErr").textContent = "Halaman termuat ulang saat memuat disc: browser kemungkinan kehabisan memori (sering terjadi di HP/iPad). " +
+      "Jadikan komputer/laptop sebagai host, lalu main di HP sebagai tamu lewat link undangan.";
+  }
+} catch {}
+
 function startEmulator(gameFile) {
+  try { sessionStorage.setItem("tb-booting", "1"); } catch {}
   Object.assign(window, {
     EJS_player: "#game",
     EJS_core: "pcsx_rearmed",          // HLE BIOS built in, no Sony BIOS file needed
@@ -218,6 +229,7 @@ $("#tagsChk").onchange = e => { if (hostView) hostView.showTags = e.target.check
 $("#layoutSel").onchange = e => detector && detector.setOverride(e.target.value);
 
 async function onGameStart() {
+  try { sessionStorage.removeItem("tb-booting"); } catch {}
   mediaStream = buildMediaStream();
   setTimeout(cacheDisc, 3000); // let the game settle first
   setupFocusView();
