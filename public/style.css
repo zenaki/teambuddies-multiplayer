@@ -118,7 +118,10 @@ header.top { flex-wrap: wrap; }
     body.is-touch.playing .viewbar, body.is-touch.playing #setup { display: none !important; }
     body.is-touch.playing #session { display: block; }
     body.is-touch.playing .stage { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; z-index: 1; background: #000; }
-    body.is-touch.playing #game { width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; }
+    /* keep the emulator canvas 4:3: it is what gets streamed, and guests, the split-screen crop
+       and the name tags all assume a 4:3 frame */
+    body.is-touch.playing .stage { display: flex; align-items: center; justify-content: center; }
+    body.is-touch.playing #game { height: 100%; width: auto; max-width: 100%; aspect-ratio: 4 / 3; border-radius: 0; }
     body.is-touch.playing .focus-overlay { border-radius: 0; }
   }
 
