@@ -167,6 +167,8 @@ try {
 
 function startEmulator(gameFile) {
   try { sessionStorage.setItem("tb-booting", "1"); } catch {}
+  enterPlayMode();
+  startHostTouchInput();
   Object.assign(window, {
     EJS_player: "#game",
     EJS_core: "pcsx_rearmed",          // HLE BIOS built in, no Sony BIOS file needed
@@ -292,6 +294,7 @@ async function onGameStart() {
   signal.on("hosted", ({ room }) => {
     $("#roomCode").textContent = room;
     $("#inviteUrl").value = inviteUrl(room);
+    $("#hudRoom").textContent = `Room ${room} · salin link`;
     $("#netStatus").textContent = "Room aktif · biarkan tab ini tetap terlihat saat bermain";
   });
   signal.on("guest-joined", g => connectGuest(g));
@@ -419,4 +422,25 @@ function renderPlayers() {
 $("#players").onclick = e => {
   const id = e.target.dataset && e.target.dataset.kick;
   if (id) { signal.send({ type: "kick", id }); dropGuest(id); }
+};
+
+// ---- Host playing on a phone: the on-screen pad drives player 1 ----
+function startHostTouchInput() {
+  if (!document.body.classList.contains("is-touch")) return;
+  let last = 0;
+  const loop = () => {
+    const gm = emu() && emu().gameManager;
+    if (gm) {
+      let mask = 0; for (const id of TouchPad.down) mask |= 1 << id;
+      const changed = mask ^ last;
+      for (let b = 0; b < 16; b++) if (changed & (1 << b)) gm.simulateInput(0, b, (mask >> b) & 1);
+      last = mask;
+    }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+$("#hudRoom").onclick = () => {
+  const url = $("#inviteUrl").value; if (!url) return;
+  (navigator.share ? navigator.share({ title: "Team Buddies", url }) : navigator.clipboard.writeText(url)).catch(() => {});
 };

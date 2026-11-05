@@ -1,8 +1,15 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Team Buddies Host</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Team Buddies">
+<meta name="theme-color" content="#12141a">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -47,6 +54,7 @@
         <canvas id="focusCanvas" class="focus-overlay hidden"></canvas>
         <video id="localVideo" class="probe" muted playsinline autoplay></video>
       </div>
+      <div id="hudPill"><span id="hudRoom" class="pill" title="Ketuk untuk menyalin link undangan">Room -----</span></div>
       <div class="row viewbar">
         <span class="muted">Tampilan:</span>
         <button id="focusBtn" class="small toggle on" aria-pressed="true">Fokus ke layarku</button>
@@ -97,6 +105,7 @@
 <script src="common.js"></script>
 <script src="viewport.js"></script>
 <script src="gamemem.js"></script>
+<script src="touchpad.js"></script>
 <script src="host.js"></script>
 </body>
 </html>

@@ -4,8 +4,7 @@
 const params = new URLSearchParams(location.search);
 $("#room").value = (params.get("room") || "").toUpperCase();
 $("#name").value = params.get("name") || localStorageGet("tb-name") || "";
-if ("ontouchstart" in window || matchMedia("(pointer: coarse)").matches) document.body.classList.add("is-touch");
-document.addEventListener("touchmove", e => { if (document.body.classList.contains("playing")) e.preventDefault(); }, { passive: false });
+
 
 function localStorageGet(k) { try { return localStorage.getItem(k); } catch { return null; } }
 function localStorageSet(k, v) { try { localStorage.setItem(k, v); } catch {} }
@@ -109,12 +108,7 @@ async function join(room, name) {
 }
 
 $("#unmute").onclick = () => {
-  document.body.classList.add("playing");
-  if (document.body.classList.contains("is-touch")) {
-    const el = document.documentElement;
-    const fs = el.requestFullscreen ? el.requestFullscreen({ navigationUI: "hide" }) : (el.webkitRequestFullscreen && el.webkitRequestFullscreen());
-    Promise.resolve(fs).then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape")).catch(() => {});
-  }
+  enterPlayMode();
   const v = $("#video"); v.muted = false; v.play().catch(() => {});
   $("#overlay").classList.add("hidden");
   active = true;
@@ -135,7 +129,7 @@ setInterval(async () => {
 setInterval(() => { if (ctrlCh && ctrlCh.readyState === "open") ctrlCh.send(JSON.stringify({ t: "ping", ts: performance.now() })); }, 1000);
 
 // ---------- Input capture ----------
-const keysDown = new Set(), touchDown = new Set();
+const keysDown = new Set(), touchDown = TouchPad.down;
 const isTyping = e => e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA");
 addEventListener("keydown", e => {
   if (!active || isTyping(e)) return;
@@ -145,38 +139,6 @@ addEventListener("keydown", e => {
 addEventListener("keyup", e => { keysDown.delete(e.key.toLowerCase()); });
 addEventListener("blur", () => keysDown.clear());
 
-// Touch buttons: each keeps its own pointer, so several can be held at once.
-for (const b of document.querySelectorAll("#touch button")) {
-  const id = Number(b.dataset.b);
-  let downAt = 0;
-  const on = e => { e.preventDefault(); b.setPointerCapture && b.setPointerCapture(e.pointerId); downAt = performance.now(); touchDown.add(id); b.classList.add("on"); if (navigator.vibrate) navigator.vibrate(8); };
-  // a quick tap must still reach the game: keep it held for at least ~4 frames
-  const off = e => { e.preventDefault(); const wait = Math.max(0, 70 - (performance.now() - downAt)); setTimeout(() => { touchDown.delete(id); b.classList.remove("on"); }, wait); };
-  b.addEventListener("pointerdown", on); b.addEventListener("pointerup", off);
-  b.addEventListener("pointercancel", off); b.addEventListener("lostpointercapture", off);
-  b.addEventListener("contextmenu", e => e.preventDefault());
-}
-// D-pad is one zone: slide the thumb to change direction (diagonals included).
-const dpad = $("#dpad"), DIRS = { u: BTN.UP, d: BTN.DOWN, l: BTN.LEFT, r: BTN.RIGHT };
-let dpadPointer = null;
-function dpadSet(e) {
-  for (const k in DIRS) touchDown.delete(DIRS[k]);
-  dpad.querySelectorAll("span").forEach(s => s.classList.remove("on"));
-  if (!e) return;
-  const r = dpad.getBoundingClientRect(), x = e.clientX - (r.left + r.width / 2), y = e.clientY - (r.top + r.height / 2);
-  if (Math.hypot(x, y) < r.width * 0.12) return; // dead zone in the middle
-  const a = Math.atan2(y, x) * 180 / Math.PI; // 0 = right, 90 = down
-  const dirs = [];
-  if (a > -67.5 && a < 67.5) dirs.push("r");
-  if (a > 112.5 || a < -112.5) dirs.push("l");
-  if (a > 22.5 && a < 157.5) dirs.push("d");
-  if (a < -22.5 && a > -157.5) dirs.push("u");
-  for (const k of dirs) { touchDown.add(DIRS[k]); dpad.querySelector("." + k).classList.add("on"); }
-}
-dpad.addEventListener("pointerdown", e => { e.preventDefault(); dpadPointer = e.pointerId; dpad.setPointerCapture(e.pointerId); dpadSet(e); });
-dpad.addEventListener("pointermove", e => { if (e.pointerId === dpadPointer) dpadSet(e); });
-const dpadEnd = e => { if (e.pointerId === dpadPointer) { dpadPointer = null; dpadSet(null); } };
-dpad.addEventListener("pointerup", dpadEnd); dpad.addEventListener("pointercancel", dpadEnd); dpad.addEventListener("lostpointercapture", dpadEnd);
 
 const DEADZONE = 0.15;
 function readState() {

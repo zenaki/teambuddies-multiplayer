@@ -1,53 +1,17 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Team Buddies Join</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Team Buddies">
+<meta name="theme-color" content="#12141a">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="stylesheet" href="style.css">
-<style>
-  /* ---- touch controls ---- */
-  .touch { display: none; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
-  body.is-touch .touch { display: block; }
-  .touch .pad, .touch .face, .touch .shoulder, .touch .mid { position: absolute; }
-  .touch button { padding: 0; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); background: rgba(20,22,30,.45); color: #fff; font-size: 18px; touch-action: none; }
-  .touch button.on, .touch .pad .on { background: rgba(245,179,1,.75); color: #1a1400; }
-  .pad { width: 150px; height: 150px; border-radius: 50%; background: rgba(20,22,30,.35); border: 2px solid rgba(255,255,255,.25); touch-action: none; }
-  .pad span { position: absolute; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.8); border-radius: 10px; font-size: 18px; }
-  .pad .u { left: 53px; top: 6px; } .pad .d { left: 53px; bottom: 6px; } .pad .l { left: 6px; top: 53px; } .pad .r { right: 6px; top: 53px; }
-  .face { width: 156px; height: 156px; }
-  .face button { position: absolute; width: 54px; height: 54px; }
-  .face .tri { left: 51px; top: 0; color: #3ccf7a; } .face .cir { right: 0; top: 51px; color: #ff6b6b; }
-  .face .crs { left: 51px; bottom: 0; color: #7fb2ff; } .face .sq { left: 0; top: 51px; color: #ff8adf; }
-  .shoulder { display: flex; gap: 8px; }
-  .shoulder button, .mid button { border-radius: 10px; width: 58px; height: 34px; font-size: 13px; font-weight: 700; }
-  .mid { display: flex; gap: 10px; }
-  .mid button { width: 64px; height: 28px; font-size: 11px; }
-  /* portrait / desktop with touch: controls below the picture */
-  body.is-touch .touch { position: relative; height: 230px; margin-top: 12px; }
-  body.is-touch .touch .pad { left: 4px; top: 50px; } body.is-touch .touch .face { right: 4px; top: 46px; }
-  body.is-touch .touch .shoulder.left { left: 4px; top: 0; } body.is-touch .touch .shoulder.right { right: 4px; top: 0; }
-  body.is-touch .touch .mid { left: 50%; transform: translateX(-50%); bottom: 4px; }
-  .rotate-hint { display: none; }
-  /* ---- phone in landscape while playing: the game fills the screen, controls float on top ---- */
-  @media (orientation: landscape) and (max-height: 560px) {
-    body.is-touch.playing { overflow: hidden; }
-    body.is-touch.playing header.top, body.is-touch.playing aside { display: none !important; }
-    body.is-touch.playing main.wrap { padding: 0; max-width: none; display: block; }
-    body.is-touch.playing .screen { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; aspect-ratio: auto !important; border-radius: 0; z-index: 1; }
-    body.is-touch.playing .touch { position: fixed; inset: 0; height: auto; margin: 0; z-index: 2; pointer-events: none; }
-    body.is-touch.playing .touch > * { pointer-events: auto; }
-    body.is-touch.playing .touch .pad { left: max(16px, env(safe-area-inset-left)); bottom: 18px; top: auto; }
-    body.is-touch.playing .touch .face { right: max(16px, env(safe-area-inset-right)); bottom: 14px; top: auto; }
-    body.is-touch.playing .touch .shoulder.left { left: max(12px, env(safe-area-inset-left)); top: 10px; }
-    body.is-touch.playing .touch .shoulder.right { right: max(12px, env(safe-area-inset-right)); top: 10px; }
-    body.is-touch.playing .touch .mid { bottom: 8px; }
-    body.is-touch.playing #hudPill { display: flex; }
-  }
-  @media (orientation: portrait) { body.is-touch.playing .rotate-hint { display: block; } }
-  .rotate-hint { text-align: center; padding: 8px; margin-top: 8px; border-radius: 8px; background: #262a36; color: var(--muted); font-size: 13px; }
-  #hudPill { display: none; position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 3; gap: 6px; }
-  #hudPill .pill { background: rgba(0,0,0,.55); }
-</style>
+
 </head>
 <body>
 <header class="top"><a href="./" style="text-decoration:none;color:inherit"><h1>Team Buddies Web</h1></a><span class="sp"></span><span id="you" class="pill hidden"></span><span id="rtt" class="pill hidden"></span></header>
@@ -105,6 +69,7 @@
 </main>
 <script src="common.js"></script>
 <script src="viewport.js"></script>
+<script src="touchpad.js"></script>
 <script src="play.js"></script>
 </body>
 </html>
